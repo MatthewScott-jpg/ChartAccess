@@ -1,28 +1,53 @@
-import { VegaLite} from 'react-vega';
+import {Vega} from 'react-vega';
 import { compile } from "vega-lite/build/vega-lite";
 import React, {useState} from "react";
-import './App.css';
+import css from './App.module.css';
 
 function App() {
   const [inputSpec, setInputSpec] = useState({});
   const [orgSpec, setOrgSpec] = useState({});
   const [showValues, setShowValues] = useState(false);
 
-  //Getter functions for obtaining aspects of the final Vega spec
-  function getMark(){
-    const value = inputSpec.marks[0].style[0]
-    return value;
+  //Getter function for obtaining aspects of the final Vega spec
+  function getInfo(){
+    const mark = inputSpec.marks[0].style[0];
+    var xTitle = inputSpec.axes[1].title;
+    var yTitle = inputSpec.axes[2].title;
+    var style = "";
+
+    if (xTitle.includes("binned") && orgSpec.encoding.x.hasOwnProperty("field")){
+      xTitle = orgSpec.encoding.x.field;
+    }
+
+    if (mark === "bar"){
+      style = getBarType()
+    }
+    const sent1 = "This is a ".concat(style);
+    const sent2 = ". Its x axis is ".concat(xTitle);
+    const sent3 = ". Its y axis is ".concat(yTitle);
+    var sent4 = "";
+    
+    if (style === "Bar Chart"){
+      //note the use of quantites, could look into using x, y type here
+      sent4 = ". Its purpose is to compare different quantities of ".concat(yTitle, " for each type of ", xTitle);
+    }
+    else if (style === "Histogram"){
+      sent4 = ". Its purpose is to compare ".concat(yTitle, " for intervals of ", xTitle);
+    }
+
+    return sent1.concat(sent2,sent3, sent4);
   }
 
-  function getX(){
-    console.log(orgSpec.encoding.x)
-    const value = inputSpec.axes[1].title;
-    return value;
-  }
-  
-  function getY(){
-    const value = inputSpec.axes[2].title;
-    return value;
+  //Differentiates bar chart and histogram
+  function getBarType(){
+    if (orgSpec.encoding.x.hasOwnProperty("bin")){
+      if (orgSpec.encoding.x.bin === true){
+        return "Histogram";
+      }
+    }
+    else{
+      return "Bar Chart";
+    }
   }
 
   //Reveals spec values on file submission
@@ -41,6 +66,7 @@ function App() {
 
   //reads vega file, handles data in url case, sets vega-lite and vega state objects
   async function showFile(e){
+    setShowValues(false);
     const reader = new FileReader()
     reader.onload = async (e) => { 
       const text = (e.target.result)
@@ -57,24 +83,22 @@ function App() {
   }
   
   return (
-    <div className="App">
+    <div className={css.App}>
       <main>
-        {/*<VegaLite spec={spec} data={barData}/>*/}
-        {/*<VegaLite spec={spec2} data={newData}/>*/}
-        
         <form onSubmit={handleSubmitJSON}>
           <input type="file" name="sourcejson" onChange={(e) => showFile(e)}/>
           <button type="submit">Add Row</button>
         </form>
-        <div id={"me"}>me</div>
-        <button>Focus the input</button>
         {
           showValues?
           (
-          <div>
-            <span>{getMark()}</span>
-            <span>{getX()}</span>
-            <span>{getY()}</span>
+          <div className={css.grid}>
+            <div className={css.chartDisplay}>
+              <Vega spec={inputSpec}/>
+            </div>
+            <div className={css.descDisplay}>
+              <p>{getInfo()}</p>
+            </div>
           </div>
           ):null
         }

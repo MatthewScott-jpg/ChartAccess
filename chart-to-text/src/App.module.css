@@ -1,0 +1,19 @@
+.App {
+  text-align: center;
+}
+
+.grid{
+  display: flex;
+}
+
+.chartDisplay{
+  text-align: right;
+  width: 50%;
+}
+
+.descDisplay{
+  display: flex;
+  text-align: left;
+  width: 50%;
+  align-items: center;
+}
