@@ -2,77 +2,32 @@ import {Vega} from 'react-vega';
 import { compile } from "vega-lite/build/vega-lite";
 import React, {useState} from "react";
 import css from './App.module.css';
-import FileLoader from './FileLoader.js';
+import {MemoizedExtract} from './extractFeatures.js'
+import FileLoader from '../FileLoader.js';
+
+
+/*grouped bar chart: primary by(age), subcategory by(sex)
+bar: marks[4]=>name="cell".marks[0].style[0]
+    subsection is the same as the basic logic in place
+marks[0].title.text = primary, marks[0].role = "column-title"
+extracting subfeatures in getView() by looking at intermediate data
+*/
+
+/*
+multiscatter successfully extracts mark, x, and y
+subcategories can be extracted from getView as well
+*/
+
+//consider temporarily repurposing getView as getSubCategories, can handle any length
+//figure out how to differentiate multicategorical graphs
+//  ie multiscatter color.field != x.field
+//  ie groupedbar fields match but len(color.scale.range) > 1
 
 function App() {
   const [inputSpec, setInputSpec] = useState({});
   const [orgSpec, setOrgSpec] = useState({});
   const [showValues, setShowValues] = useState(false);
   const [dragging, setDragging] = useState(false); // to show a dragging effect
-
-  //Getter function for obtaining aspects of the final Vega spec
-  function getInfo(){
-    const mark = inputSpec.marks[0].style[0]; //currently this works, have yet to find multiple mark case
-    var xTitle = "";
-    var yTitle = "";
-    var style = "";
-
-    for (var i in inputSpec.axes){
-      var axe = inputSpec.axes[i];
-      if (axe.scale === 'x' & 'title' in axe) {
-        xTitle = axe.title;
-        xTitle = xTitle.replace(/_/g, ' ');
-      }
-      else if (axe.scale === 'y' & 'title' in axe) {
-        yTitle = axe.title;
-        yTitle = yTitle.replace(/_/g, ' ');
-      }
-    }
-
-    //temporary fix for vega spec modifications to variables
-    if (xTitle.includes("binned") && orgSpec.encoding.x.hasOwnProperty("field")){
-      xTitle = orgSpec.encoding.x.field;
-    }
-
-    if (mark === "bar") style = getBarType();
-    else if (mark === "point" | mark === "circle") style = getScatterType();
-    else if (mark === "line") style = getLineType();
-
-    const sent1 = "This is a ".concat(style);
-    const sent2 = ". Its x axis is ".concat(xTitle);
-    const sent3 = ". Its y axis is ".concat(yTitle);
-    var sent4 = "";
-    
-    if (style === "Bar Chart"){
-      //note the use of quantites, could look into using x, y type here
-      sent4 = ". Its purpose is to compare different quantities of ".concat(yTitle, " for each type of ", xTitle);
-    }
-    else if (style === "Histogram"){
-      sent4 = ". Its purpose is to compare ".concat(yTitle, " for intervals of ", xTitle);
-    }
-
-    return sent1.concat(sent2,sent3, sent4);
-  }
-
-  //Differentiates bar chart and histogram
-  function getBarType(){
-    if (orgSpec.encoding.x.hasOwnProperty("bin")){
-      if (orgSpec.encoding.x.bin === true){
-        return "histogram";
-      }
-    }
-    else{
-      return "bar chart";
-    }
-  }
-
-  function getScatterType(){
-    return "scatter plot";
-  }
-
-  function getLineType(){
-    return "line chart";
-  }
 
   //handlers for file dragging
   function handleFileDragEnter(e){
@@ -110,7 +65,6 @@ function App() {
     }
     setDragging(false);
     e.preventDefault();
-    
   }
 
   //obtains data from input url
@@ -124,7 +78,7 @@ function App() {
     else if (url.endsWith('.json')){
       data = await response.json();
     }
-    console.log(data)
+    //console.log(data)
     return data;      
   }
 
@@ -150,7 +104,7 @@ function App() {
               <Vega spec={inputSpec}/>
             </div>
             <div className={css.descDisplay}>
-              <p>{getInfo()}</p>
+              <MemoizedExtract liteSpec={orgSpec} vegaSpec={inputSpec}/>
             </div>
           </div>
           ):null
