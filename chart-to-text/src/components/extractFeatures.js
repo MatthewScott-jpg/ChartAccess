@@ -4,7 +4,7 @@ import React, {useEffect, useState} from "react";
 
 export function Extract(props){
     //const [legend, setLegend] = useState([]);
-    const [text, setText] = useState("");
+    const [text, setText] = useState([]);
     const liteSpec = props.liteSpec;
     const vegaSpec = props.vegaSpec;
 
@@ -27,16 +27,6 @@ export function Extract(props){
             //liteSpec.encoding.color.field === vegaSpec.legends[0].title
             if ("legends" in vegaSpec){
                 await getView();
-            }
-
-            if ("title" in liteSpec.encoding.x){
-                xTitle = liteSpec.encoding.x.title;
-            }
-            if ("title" in liteSpec.encoding.y){
-                yTitle = liteSpec.encoding.y.title;
-            }
-            if ("column" in liteSpec.encoding && "field" in liteSpec.encoding.column){
-                xTitle = liteSpec.encoding.column.field;
             }
             
             if ("title" in liteSpec.encoding.x){
@@ -70,6 +60,7 @@ export function Extract(props){
             if (mark === "bar") style = getBarType();
             else if (mark === "point" | mark === "circle") style = getScatterType();
             else if (mark === "line") style = getLineType();
+            else if (mark === "area") style = getAreaType();
 
             //Builds text
             const sent1 = "This is a ".concat(style, ". ");
@@ -92,8 +83,7 @@ export function Extract(props){
                 }
                 sent4 += legend[legend.length-1];
             }
-
-            setText(sent1.concat(sent2,sent3, sent4));
+            setText([sent1,sent2,sent3, sent4]);
         }
         async function getView(){
             const runtime = parse(vegaSpec);
@@ -137,17 +127,38 @@ export function Extract(props){
         }
             
         function getScatterType(){
+            if ("color" in liteSpec.encoding&&liteSpec.encoding.color.field === vegaSpec.legends[0].title){
+                return "multiple category scatter plot";
+            }
             return "scatter plot";
         }
             
         function getLineType(){
+            if ("color" in liteSpec.encoding&&liteSpec.encoding.color.field === vegaSpec.legends[0].title){
+                return "multi-series line chart";
+            }
             return "line chart";
         }
+        
+        function getAreaType(){
+            if ("transform" in liteSpec){
+                for (var elem in liteSpec.transform){
+                    if ("density" in liteSpec.transform[elem]) return "density plot";
+                }
+            }
+            if ("color" in liteSpec.encoding&&liteSpec.encoding.color.field === vegaSpec.legends[0].title){
+                if ("aggregate" in liteSpec.encoding.y){
+                    return "stacked area chart";
+                }
+            }
+            return "area chart";
+        }
+
         getInfo();
     }, [liteSpec, vegaSpec])
 
     return(
-        <div>{text}</div>
+        <div>{text.map(txt=><div>{txt}</div>)}</div>
     );
 }
 

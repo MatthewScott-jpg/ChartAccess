@@ -5,24 +5,6 @@ import css from './App.module.css';
 import {MemoizedExtract} from './extractFeatures.js'
 import FileLoader from '../FileLoader.js';
 
-
-/*grouped bar chart: primary by(age), subcategory by(sex)
-bar: marks[4]=>name="cell".marks[0].style[0]
-    subsection is the same as the basic logic in place
-marks[0].title.text = primary, marks[0].role = "column-title"
-extracting subfeatures in getView() by looking at intermediate data
-*/
-
-/*
-multiscatter successfully extracts mark, x, and y
-subcategories can be extracted from getView as well
-*/
-
-//consider temporarily repurposing getView as getSubCategories, can handle any length
-//figure out how to differentiate multicategorical graphs
-//  ie multiscatter color.field != x.field
-//  ie groupedbar fields match but len(color.scale.range) > 1
-
 function App() {
   const [inputSpec, setInputSpec] = useState({});
   const [orgSpec, setOrgSpec] = useState({});
