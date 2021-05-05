@@ -17,15 +17,15 @@ of chart, and, if a legend is present, the values it contains.
 
 The chart types that can be classified so far are as follows:
 
-*Bar Chart
-*Stacked Bar Chart
-*Layered Bar Chart
-*Grouped Bar Chart
-*Histogram
-*Scatterplot
-*Multi-Category Scatterplot
-*Line Chart
-*Multi-Series Line Chart
-*Area Chart
-*Stacked Area Chart
-*Density Plot
+* Bar Chart
+* Stacked Bar Chart
+* Layered Bar Chart
+* Grouped Bar Chart
+* Histogram
+* Scatterplot
+* Multi-Category Scatterplot
+* Line Chart
+* Multi-Series Line Chart
+* Area Chart
+* Stacked Area Chart
+* Density Plot
