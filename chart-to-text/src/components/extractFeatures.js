@@ -120,7 +120,7 @@ export function Extract(props){
                 //bar chart logic
                 if ("aggregate" in liteSpec.encoding.y){
                     if (liteSpec.encoding.y.aggregate === "count"){
-                    return "stacked bar chart"
+                        return "stacked bar chart"
                     }
                     else if (liteSpec.encoding.y.aggregate === "sum"){
                         //the grouped bar chart uses gender, not age as its x field
